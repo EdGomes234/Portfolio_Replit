@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section id="home" class="hero-section d-flex align-items-center text-center text-light py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <img src="{{ url_for("static", filename="images/profile.png") }}" alt="Foto de Perfil" class="profile-img mb-4" data-aos="fade-up">
+                    <h1 class="display-4 fw-bold mb-3" data-aos="fade-up" data-aos-delay="100">Olá, eu sou Edgar Gomes</h1>
+                    <p class="lead mb-4" data-aos="fade-up" data-aos-delay="200">Desenvolvedor Full Stack apaixonado por criar soluções inovadoras e eficientes.</p>
+                    <a href="#projects" class="btn btn-primary btn-lg me-3" data-aos="fade-up" data-aos-delay="300">Meus Projetos</a>
+                    <a href="#contact" class="btn btn-outline-light btn-lg" data-aos="fade-up" data-aos-delay="400">Entre em Contato</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h2 class="display-5 fw-bold mb-4">Sobre Mim</h2>
+                    <p class="lead">Atualmente estou no 3º ano do Ensino Médio e cursando Análise e Desenvolvimento de Sistemas no Senai. Sou acostumado com o ambiente de trabalho e prazos, sou cooperativo e tenho experiência com trabalhos em grupo, principalmente envolvendo o método SCRUM. Estou à procura de um primeiro emprego na área de programação.</p>
+                    <p class="lead">Meus hobbies incluem tocar guitarra 🎸, jogar videogame 🎮, assistir séries e ler 📖.</p>
+                    <div class="social-links mt-4">
+                        <a href="https://github.com/EdGomes234" target="_blank" class="me-3"><i class="fab fa-github fa-2x"></i></a>
+                        <a href="https://www.linkedin.com/in/edgar-gomes234" target="_blank" class="me-3"><i class="fab fa-linkedin fa-2x"></i></a>
+                        <a href="mailto:EdGomesOliva@gmail.com"><i class="fas fa-envelope fa-2x"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center mt-4 mt-lg-0" data-aos="fade-left">
+                    <img src="{{ url_for("static", filename="images/about.png") }}" alt="Sobre Mim" class="img-fluid rounded shadow-lg">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects-section py-5 bg-light">
+        <div class="container">
+            <h2 class="display-5 fw-bold text-center mb-5">Meus Projetos</h2>
+            <div class="row">
+                {% for project in projects %}
+                <div class="col-md-6 col-lg-4 mb-4" data-aos="zoom-in" data-aos-delay="{{ loop.index * 100 }}">
+                    <div class="card project-card h-100 shadow-sm border-0">
+                        <img src="{{ url_for("static", filename="images/project_placeholder.png") }}" class="card-img-top" alt="{{ project.title }}">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ project.title }}</h5>
+                            <p class="card-text text-muted">{{ project.description }}</p>
+                            <div class="mt-auto">
+                                {% if project.github_link %}
+                                <a href="{{ project.github_link }}" target="_blank" class="btn btn-sm btn-outline-dark me-2">
+                                    <i class="fab fa-github me-1"></i>GitHub
+                                </a>
+                                {% endif %}
+                                {% if project.demo_link %}
+                                <a href="{{ project.demo_link }}" target="_blank" class="btn btn-sm btn-outline-primary me-2">
+                                    <i class="fas fa-external-link-alt me-1"></i>Demo
+                                </a>
+                                {% endif %}
+                                <a href="{{ url_for('project_detail', id=loop.index) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye me-1"></i>Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12 text-center">
+                    <p class="lead">Nenhum projeto encontrado. Em breve, novos projetos serão adicionados!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="skills-section py-5">
+        <div class="container">
+            <h2 class="display-5 fw-bold text-center mb-5">Minhas Habilidades</h2>
+            <div class="row text-center">
+                <div class="col-6 col-md-4 col-lg-2 mb-4" data-aos="fade-up">
+                    <i class="fab fa-python fa-4x text-primary mb-3"></i>
+                    <p class="fw-bold">Python</p>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 mb-4" data-aos="fade-up" data-aos-delay="100">
+                    <i class="fab fa-flask fa-4x text-primary mb-3"></i>
+                    <p class="fw-bold">Flask</p>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 mb-4" data-aos="fade-up" data-aos-delay="200">
+                    <i class="fab fa-html5 fa-4x text-primary mb-3"></i>
+                    <p class="fw-bold">HTML5</p>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 mb-4" data-aos="fade-up" data-aos-delay="300">
+                    <i class="fab fa-css3-alt fa-4x text-primary mb-3"></i>
+                    <p class="fw-bold">CSS3</p>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 mb-4" data-aos="fade-up" data-aos-delay="400">
+                    <i class="fab fa-js fa-4x text-primary mb-3"></i>
+                    <p class="fw-bold">JavaScript</p>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 mb-4" data-aos="fade-up" data-aos-delay="500">
+                    <i class="fas fa-database fa-4x text-primary mb-3"></i>
+                    <p class="fw-bold">SQL</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section py-5 bg-light">
+        <div class="container">
+            <h2 class="display-5 fw-bold text-center mb-5">Entre em Contato</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <p class="lead text-center mb-4">Estou sempre aberto a novas oportunidades e colaborações. Sinta-se à vontade para entrar em contato!</p>
+                    <form>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Mensagem</label>
+                            <textarea class="form-control" id="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">Enviar Mensagem</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+

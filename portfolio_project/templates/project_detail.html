@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }} - Edgar Gomes{% endblock %}
+
+{% block extra_css %}
+<style>
+.project-detail-header {
+    background: linear-gradient(135deg, #00ADB5, #222831);
+    color: white;
+    padding: 4rem 0;
+}
+
+.project-stats {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 2rem;
+}
+
+.comment-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.comment-item {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.like-button {
+    border: none;
+    background: none;
+    color: #6c757d;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.like-button:hover {
+    color: #dc3545;
+    transform: scale(1.1);
+}
+
+.like-button.liked {
+    color: #dc3545;
+}
+
+.project-image {
+    max-width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.tech-badge {
+    background: #00ADB5;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Project Header -->
+<section class="project-detail-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-3">{{ project.title }}</h1>
+                <p class="lead mb-4">{{ project.description }}</p>
+                
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    {% if project.github_link %}
+                    <a href="{{ project.github_link }}" target="_blank" class="btn btn-outline-light">
+                        <i class="fab fa-github me-2"></i>Ver no GitHub
+                    </a>
+                    {% endif %}
+                    
+                    {% if project.demo_link %}
+                    <a href="{{ project.demo_link }}" target="_blank" class="btn btn-light">
+                        <i class="fas fa-external-link-alt me-2"></i>Ver Demo
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Project Stats -->
+                <div class="project-stats">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="fw-bold">{{ project.get_like_count() }}</div>
+                            <small>Curtidas</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="fw-bold">{{ project.comments|length }}</div>
+                            <small>Comentários</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="fw-bold">
+                                {% if project.github_language %}
+                                    {{ project.github_language }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </div>
+                            <small>Linguagem</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 text-center">
+                {% if project.image_path %}
+                <img src="{{ url_for('uploaded_file', filename=project.image_path) }}" 
+                     alt="{{ project.title }}" class="project-image">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/project_placeholder.png') }}" 
+                     alt="{{ project.title }}" class="project-image">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Project Content -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Project Description -->
+                <div class="mb-5">
+                    <h3 class="fw-bold mb-3">Sobre o Projeto</h3>
+                    {% if project.content %}
+                        <div class="content">{{ project.content|nl2br|safe }}</div>
+                    {% else %}
+                        <p>{{ project.description }}</p>
+                        <p>Este é um dos projetos destacados do meu portfólio no GitHub. Desenvolvido com foco em boas práticas de programação e design.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Technologies Used -->
+                {% if project.tags %}
+                <div class="mb-5">
+                    <h3 class="fw-bold mb-3">Tecnologias Utilizadas</h3>
+                    <div>
+                        {% for tag in project.tags %}
+                        <span class="tech-badge">{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Like Section -->
+                <div class="mb-4">
+                    {% if current_user.is_authenticated %}
+                    <button class="like-button {% if project.is_liked_by_user(current_user.id) %}liked{% endif %}" 
+                            onclick="toggleLike({{ project.id }})">
+                        <i class="fas fa-heart me-2"></i>
+                        <span id="like-count">{{ project.get_like_count() }}</span> curtidas
+                    </button>
+                    {% else %}
+                    <div class="text-muted">
+                        <i class="fas fa-heart me-2"></i>{{ project.get_like_count() }} curtidas
+                        <small class="ms-2">(<a href="{{ url_for('login') }}">Faça login</a> para curtir)</small>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Comments Section -->
+                <div class="comment-section">
+                    <h3 class="fw-bold mb-4">Comentários ({{ project.comments|length }})</h3>
+                    
+                    <!-- Add Comment Form -->
+                    {% if current_user.is_authenticated %}
+                    <form method="POST" action="{{ url_for('add_comment', id=project.id) }}" class="mb-4">
+                        {{ comment_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ comment_form.content.label(class="form-label fw-bold") }}
+                            {{ comment_form.content(class="form-control", rows="3", placeholder="Deixe seu comentário sobre este projeto...") }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-comment me-2"></i>Comentar
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <a href="{{ url_for('login') }}">Faça login</a> para deixar um comentário.
+                    </div>
+                    {% endif %}
+
+                    <!-- Comments List -->
+                    {% for comment in project.comments %}
+                    <div class="comment-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="fw-bold">{{ comment.author.get_full_name() }}</div>
+                            <small class="text-muted">{{ comment.created_at|time_ago }}</small>
+                        </div>
+                        <p class="mb-0">{{ comment.content|nl2br|safe }}</p>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-comments fa-3x mb-3"></i>
+                        <p>Ainda não há comentários neste projeto.</p>
+                        <p>Seja o primeiro a comentar!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="sticky-top" style="top: 100px;">
+                    <!-- Project Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Informações do Projeto</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if project.github_stars %}
+                            <div class="mb-2">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                <strong>{{ project.github_stars }}</strong> estrelas
+                            </div>
+                            {% endif %}
+                            
+                            {% if project.github_forks %}
+                            <div class="mb-2">
+                                <i class="fas fa-code-branch text-info me-2"></i>
+                                <strong>{{ project.github_forks }}</strong> forks
+                            </div>
+                            {% endif %}
+                            
+                            {% if project.github_language %}
+                            <div class="mb-2">
+                                <i class="fas fa-code text-primary me-2"></i>
+                                <strong>{{ project.github_language }}</strong>
+                            </div>
+                            {% endif %}
+                            
+                            {% if project.created_at %}
+                            <div class="mb-2">
+                                <i class="fas fa-calendar text-secondary me-2"></i>
+                                Criado {{ project.created_at|time_ago }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Other Projects -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Outros Projetos</h5>
+                        </div>
+                        <div class="card-body">
+                            <a href="{{ url_for('index') }}#projects" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-arrow-left me-2"></i>Ver Todos os Projetos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleLike(projectId) {
+    fetch(`/project/${projectId}/like`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const likeButton = document.querySelector('.like-button');
+        const likeCount = document.getElementById('like-count');
+        
+        if (data.liked) {
+            likeButton.classList.add('liked');
+        } else {
+            likeButton.classList.remove('liked');
+        }
+        
+        likeCount.textContent = data.like_count;
+    })
+    .catch(error => {
+        console.error('Erro ao curtir projeto:', error);
+    });
+}
+</script>
+{% endblock %}
+
